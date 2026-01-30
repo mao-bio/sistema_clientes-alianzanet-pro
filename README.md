@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🛰️ ALIANZANET PRO - Sistema de Gestión ISP
 
-## Getting Started
+![ALIANZANET Logo](/public/logo.png)
 
-First, run the development server:
+**Alianzanet Pro** es una plataforma avanzada de gestión para proveedores de servicios de Internet (ISP), diseñada para centralizar la administración de clientes, el control de morosidad y la automatización de notificaciones en un entorno moderno, rápido y seguro.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Características Principales
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 📊 Dashboard Inteligente
+*   **Métricas en Tiempo Real:** Visualización instantánea de ingresos, clientes activos, suspendidos y morosos.
+*   **Gráficos Dinámicos:** Análisis de crecimiento y distribución de clientes por nodos y planes.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 👥 Gestión de Clientes (CRUD)
+*   **Control Total:** Creación, edición y visualización detallada de fichas técnicas de clientes.
+*   **Automatización de Fechas:** Cálculo automático de fechas de instalación y próximos vencimientos de pago.
+*   **Campos Personalizados:** Soporte para ID de usuario, Nodos, Planes, TV Box y múltiples contactos.
 
-## Learn More
+### 💰 Control de Morosidad y Cobros
+*   **Detección Automática:** Identificación de clientes con pagos pendientes basado en el mes actual.
+*   **Gestión de Pagos:** Registro de mensualidades con generación automática de recibos profesionales.
+*   **Calculadora Financiera:** Análisis preventivo de utilidad bruta (Ingresos vs Gastos).
 
-To learn more about Next.js, take a look at the following resources:
+### 📧 Automatización de Notificaciones
+*   **Email Branding:** Envío de recibos, recordatorios y alertas de estado con diseño corporativo premium.
+*   **Envíos del Día 01:** Automatización completa para el envío de recordatorios mensuales.
+*   **Integración Telegram:** Reportes diarios y alertas de morosidad directas a tu chat.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 📱 Experiencia Multiplataforma
+*   **Diseño Responsivo:** Optimizado 100% para celulares, tablets y computadoras.
+*   **Navegación Móvil:** Barra inferior intuitiva para una gestión rápida desde el campo.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🛠️ Stack Tecnológico
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+*   **Frontend:** [Next.js 14](https://nextjs.org/) + [React](https://reactjs.org/)
+*   **Estilos:** [Tailwind CSS](https://tailwindcss.com/)
+*   **Base de Datos:** [Supabase](https://supabase.com/) (PostgreSQL)
+*   **Automatización:** [Google Apps Script](https://developers.google.com/apps-script)
+*   **Notificaciones:** MailApp API & Telegram Bot API
+*   **Animaciones:** [Framer Motion](https://www.framer.com/motion/)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 🚀 Instalación y Despliegue
+
+### Requisitos Previos
+*   Node.js 18+ instalado.
+*   Cuenta en Supabase.
+*   Proyecto de Google Apps Script configurado.
+
+### Configuración Local
+1.  Clona el repositorio.
+2.  Instala las dependencias:
+    ```bash
+    npm install
+    ```
+3.  Crea un archivo `.env.local` con tus credenciales:
+    ```env
+    NEXT_PUBLIC_SUPABASE_URL=tu_url_de_supabase
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_llave_anon
+    ```
+4.  Inicia el servidor de desarrollo:
+    ```bash
+    npm run dev
+    ```
+
+### Despliegue en Vercel
+1.  Sube tu proyecto a GitHub.
+2.  Conéctalo en **Vercel**.
+3.  Configura las **Environment Variables** con los datos de tu `.env.local`.
+4.  ¡Listo! Tu sistema estará en línea.
+
+---
+
+## 🔒 Seguridad y Privacidad
+Este sistema utiliza un Token de Seguridad (`MI_TOKEN_SEGURO`) para la comunicación entre el Frontend y el servidor de correos (GAS), garantizando que solo la aplicación autorizada pueda emitir notificaciones.
+
+---
+
+## 👨‍💻 Autor
+Desarrollado para **Alianzanet** - *Calidad y Conectividad*.
