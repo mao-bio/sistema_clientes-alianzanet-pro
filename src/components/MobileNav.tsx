@@ -11,6 +11,7 @@ import {
     TrendingUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
 
 const menuItems = [
     { name: 'Dash', icon: BarChart3, href: '/' },
@@ -53,6 +54,8 @@ export function MobileBottomNav() {
 }
 
 export function MobileHeader() {
+    const { logout, user } = useAuth();
+
     return (
         <header className="lg:hidden sticky top-0 bg-blue-950/40 backdrop-blur-2xl border-b border-white/10 z-50 p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -61,9 +64,12 @@ export function MobileHeader() {
                     ALIANZA<span className="text-amber-400">NET</span>
                 </h1>
             </div>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-400 to-orange-600 flex items-center justify-center text-[10px] font-black text-blue-950">
-                AD
-            </div>
+            <button
+                onClick={logout}
+                className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-400 to-orange-600 flex items-center justify-center text-[10px] font-black text-blue-950 active:scale-95 transition-all shadow-lg shadow-amber-500/20"
+            >
+                {user?.substring(0, 2).toUpperCase() || 'AD'}
+            </button>
         </header>
     );
 }

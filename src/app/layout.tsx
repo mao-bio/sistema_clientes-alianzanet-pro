@@ -5,6 +5,7 @@ import Sidebar from "@/components/Sidebar";
 import { MobileHeader, MobileBottomNav } from "@/components/MobileNav";
 
 import AuthWrapper from "@/components/AuthWrapper";
+import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata: Metadata = {
   title: "ALIANZANET | Pro Management System",
@@ -19,19 +20,21 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className="antialiased">
-        <AuthWrapper>
-          <div className="flex flex-col lg:flex-row min-h-screen relative">
-            <div className="bg-mesh" />
-            <MobileHeader />
-            <Sidebar />
-            <main className="flex-1 overflow-y-auto lg:max-h-screen relative z-10">
-              <div className="p-4 md:p-8 pb-24 lg:pb-8 max-w-7xl mx-auto">
-                {children}
-              </div>
-            </main>
-            <MobileBottomNav />
-          </div>
-        </AuthWrapper>
+        <AuthProvider>
+          <AuthWrapper>
+            <div className="flex flex-col lg:flex-row min-h-screen relative">
+              <div className="bg-mesh" />
+              <MobileHeader />
+              <Sidebar />
+              <main className="flex-1 overflow-y-auto lg:max-h-screen relative z-10">
+                <div className="p-4 md:p-8 pb-24 lg:pb-8 max-w-7xl mx-auto">
+                  {children}
+                </div>
+              </main>
+              <MobileBottomNav />
+            </div>
+          </AuthWrapper>
+        </AuthProvider>
       </body>
     </html>
   );
