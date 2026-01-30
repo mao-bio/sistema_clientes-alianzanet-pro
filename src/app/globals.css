@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0a1628;
+  --foreground: #ffffff;
+  --primary: #fbbf24;
+  --primary-foreground: #1e3a8a;
+  --secondary: #1e3a8a;
+  --secondary-foreground: #fbbf24;
+  --accent: #f97316;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --card: rgba(30, 58, 138, 0.4);
+  --card-foreground: #ffffff;
+  --border: rgba(251, 191, 36, 0.15);
+}
+
+@layer base {
+  body {
+    @apply bg-[#0a1628] text-[#ffffff] overflow-x-hidden antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Outfit', sans-serif;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-blue-900/20 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  .premium-border {
+    @apply border border-amber-500/20 hover:border-amber-500/40 transition-colors duration-300;
+  }
+
+  .premium-gradient {
+    @apply bg-gradient-to-br from-amber-400 via-orange-500 to-amber-600;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-amber-200 via-amber-400 to-orange-400 bg-clip-text text-transparent;
+  }
+
+  .sidebar-active {
+    @apply bg-gradient-to-r from-amber-500/20 to-transparent border-l-4 border-amber-500;
+  }
+}
+
+/* Background elements */
+.bg-mesh {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-color: #060e1a;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.3) 0, transparent 50%),
+    radial-gradient(at 50% 0%, rgba(245, 158, 11, 0.05) 0, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(30, 58, 138, 0.3) 0, transparent 50%);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a1628;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(251, 191, 36, 0.4);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(251, 191, 36, 0.6);
+}
