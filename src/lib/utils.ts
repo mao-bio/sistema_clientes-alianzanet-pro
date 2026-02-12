@@ -45,3 +45,21 @@ export function makeWhatsAppLink(number: string | number, name: string) {
     const msg = `Hola ${name.toUpperCase()} 👋, te saludamos de ALIANZANET. 🛰️\n\nTe informamos que no hemos registrado tu pago del mes actual. 💳\n\nPor favor, envíanos el soporte de pago para evitar interrupciones en tu servicio. ¡Gracias! ✨`;
     return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
 }
+
+export function getDaysSince(dateString?: string | null): number {
+    if (!dateString) return 999;
+    let date = new Date(dateString);
+
+    // Soporte para DD/MM/YYYY
+    if (isNaN(date.getTime()) && dateString.includes('/')) {
+        const parts = dateString.split('/');
+        if (parts.length === 3) {
+            date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+        }
+    }
+
+    if (isNaN(date.getTime())) return 0;
+
+    const diffTime = Math.abs(new Date().getTime() - date.getTime());
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}

@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import MetricCard from "@/components/MetricCard";
 import { apiService } from "@/lib/api";
-import { formatCOP, cn } from "@/lib/utils";
+import { formatCOP, cn, getDaysSince } from "@/lib/utils";
 import { getMesActualEs } from "@/lib/constants";
 import {
   BarChart,
@@ -63,7 +63,10 @@ export default function DashboardPage() {
   const totalClients = data.length;
   const activeClients = data.filter(c => c.ESTADO === "ACTIVO").length;
   const mesActual = getMesActualEs();
-  const morosos = data.filter(c => c["MES PAGADO"] !== mesActual).length;
+  const morosos = data.filter(c => {
+    const days = getDaysSince(c["ULTIMO PAGO"] || c["FECHA DE INSTALACION"]);
+    return days > 30;
+  }).length;
 
   const totalRevenue = data.reduce((acc, c) => {
     const val = typeof c.VALOR === 'string'

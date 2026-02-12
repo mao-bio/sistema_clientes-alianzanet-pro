@@ -9,10 +9,11 @@ import {
     Calendar,
     RefreshCcw,
     CheckCircle2,
-    CreditCard
+    CreditCard,
+    FileText
 } from "lucide-react";
 import { apiService } from "@/lib/api";
-import { formatCOP, makeWhatsAppLink, cn } from "@/lib/utils";
+import { formatCOP, makeWhatsAppLink, cn, getDaysSince } from "@/lib/utils";
 import Badge from "@/components/Badge";
 import { getMesActualEs, MESES_ES } from "@/lib/constants";
 import Modal from "@/components/Modal";
@@ -44,6 +45,96 @@ export default function MorososPage() {
     useEffect(() => {
         fetchData();
     }, [mes]);
+
+    // Automatic Notification Logic (60+ days)
+    useEffect(() => {
+        if (loading || data.length === 0) return;
+
+        const checkNotifications = async () => {
+            const criticalDefaulters = data.filter(c => {
+                const days = getDaysSince(c["ULTIMO PAGO"] || c["FECHA DE INSTALACION"]);
+                const alreadyNotified = c.FECHA_NOTIFICACION && getDaysSince(c.FECHA_NOTIFICACION) < 30; // Notified recently
+                return days > 60 && !alreadyNotified;
+            });
+
+            if (criticalDefaulters.length > 0) {
+                console.log(`⚠️ Detectados ${criticalDefaulters.length} clientes críticos (>60 días). Iniciando notificaciones...`);
+
+                try {
+                    // 1. Send Admin Report
+                    await apiService.postAction({
+                        action: "sendAdminReport",
+                        destinatario: "alianzanet9@gmail.com",
+                        morosos: criticalDefaulters.map(c => ({
+                            nombre: c.NOMBRE,
+                            dias: getDaysSince(c["ULTIMO PAGO"] || c["FECHA DE INSTALACION"]),
+                            deuda: c.VALOR
+                        }))
+                    });
+
+                    // 2. Send Client Suspensions & Update DB
+                    for (const client of criticalDefaulters) {
+                        if (client.CORREO) {
+                            await apiService.postAction({
+                                action: "sendSuspensionNotice",
+                                ...client
+                            });
+                        }
+
+                        // Update FECHA_NOTIFICACION in DB to avoid loop
+                        await apiService.postAction({
+                            action: "saveCliente",
+                            ...client,
+                            FECHA_NOTIFICACION: new Date().toISOString()
+                        });
+                    }
+                    console.log("✅ Notificaciones automáticas completadas.");
+                } catch (error) {
+                    console.error("❌ Error en notificaciones automáticas:", error);
+                }
+            }
+        };
+
+        const timer = setTimeout(checkNotifications, 3000); // Small delay to ensure data load
+        return () => clearTimeout(timer);
+    }, [data, loading]);
+
+    const filtered = data
+        .filter(c => {
+            const matchesSearch =
+                c.NOMBRE?.toLowerCase().includes(search.toLowerCase()) ||
+                c.DIRECCION?.toLowerCase().includes(search.toLowerCase()) ||
+                String(c.ID).includes(search);
+
+            // 30 Days Logic: Only show if > 30 days overdue
+            const days = getDaysSince(c["ULTIMO PAGO"] || c["FECHA DE INSTALACION"]);
+            return matchesSearch && days > 30;
+        });
+
+    const handleTelegramReport = async () => {
+        if (filtered.length === 0) return;
+        if (!confirm(`¿Enviar reporte de ${filtered.length} morosos a Telegram y Correo Admin?`)) return;
+
+        setSendingBatch(true);
+        try {
+            const reportData = filtered.map(c => ({
+                nombre: c.NOMBRE,
+                dias: getDaysSince(c["ULTIMO PAGO"] || c["FECHA DE INSTALACION"]),
+                deuda: c.VALOR
+            }));
+
+            await apiService.postAction({
+                action: "sendAdminReport",
+                destinatario: "alianzanet9@gmail.com",
+                morosos: reportData
+            });
+            alert("✅ Reporte enviado exitosamente");
+        } catch (e) {
+            alert("❌ Error al enviar reporte");
+        } finally {
+            setSendingBatch(false);
+        }
+    };
 
     const handleBatchEmails = async () => {
         if (filtered.length === 0) return;
@@ -84,14 +175,6 @@ export default function MorososPage() {
         setIsModalOpen(false);
         fetchData();
     };
-
-    const filtered = data.filter(c => {
-        return (
-            c.NOMBRE?.toLowerCase().includes(search.toLowerCase()) ||
-            c.DIRECCION?.toLowerCase().includes(search.toLowerCase()) ||
-            String(c.ID).includes(search)
-        );
-    });
 
     const totalDeuda = filtered.reduce((acc, curr) => {
         const val = typeof curr.VALOR === 'string' ? parseFloat(curr.VALOR.replace(/[$. ,]/g, '')) : curr.VALOR || 0;
@@ -151,16 +234,27 @@ export default function MorososPage() {
                     <div className="absolute -right-10 -top-10 w-40 h-40 bg-amber-500/10 blur-[50px] rounded-full group-hover:bg-amber-500/20 transition-all" />
                     <div className="relative z-10 text-center md:text-left">
                         <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-2 md:mb-3">Clientes en Estado de Mora</p>
-                        <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">{data.length} <span className="text-lg md:text-xl font-medium text-slate-500 italic">Usuarios</span></h2>
+                        <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">{filtered.length} <span className="text-lg md:text-xl font-medium text-slate-500 italic">Usuarios</span></h2>
                     </div>
-                    <button
-                        onClick={handleBatchEmails}
-                        disabled={sendingBatch || data.length === 0}
-                        className="w-full md:w-auto flex items-center justify-center gap-3 px-6 md:px-8 py-4 md:py-5 premium-gradient text-white rounded-2xl font-black transition-all shadow-xl shadow-amber-500/20 active:scale-95 disabled:opacity-30 disabled:grayscale relative z-10 hover:brightness-110"
-                    >
-                        {sendingBatch ? <RefreshCcw className="w-5 h-5 md:w-6 md:h-6 animate-spin" /> : <Send className="w-5 h-5 md:w-6 md:h-6" />}
-                        <span className="text-sm md:text-base">Recordatorio Masivo</span>
-                    </button>
+                    <div className="flex flex-col md:flex-row gap-3 relative z-10 w-full md:w-auto">
+                        <button
+                            onClick={handleTelegramReport}
+                            disabled={sendingBatch || filtered.length === 0}
+                            className="flex items-center justify-center gap-2 px-6 py-4 bg-sky-500/10 text-sky-400 border border-sky-500/20 rounded-2xl font-black transition-all hover:bg-sky-500 hover:text-white disabled:opacity-30 disabled:grayscale hover:shadow-lg hover:shadow-sky-500/20"
+                            title="Enviar reporte a Telegram"
+                        >
+                            <FileText className="w-5 h-5" />
+                            <span className="text-sm">Reporte TG</span>
+                        </button>
+                        <button
+                            onClick={handleBatchEmails}
+                            disabled={sendingBatch || filtered.length === 0}
+                            className="flex items-center justify-center gap-3 px-6 md:px-8 py-4 md:py-5 premium-gradient text-white rounded-2xl font-black transition-all shadow-xl shadow-amber-500/20 active:scale-95 disabled:opacity-30 disabled:grayscale hover:brightness-110"
+                        >
+                            {sendingBatch ? <RefreshCcw className="w-5 h-5 md:w-6 md:h-6 animate-spin" /> : <Send className="w-5 h-5 md:w-6 md:h-6" />}
+                            <span className="text-sm md:text-base">Recordatorio Masivo</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -230,9 +324,18 @@ export default function MorososPage() {
                                         >
                                             <td className="px-8 py-6">
                                                 <p className="text-white font-black text-lg group-hover:text-rose-400 transition-colors">{cliente.NOMBRE}</p>
-                                                <div className="flex gap-2 mt-1">
-                                                    <Badge variant="danger">PENDIENTE</Badge>
-                                                    <span className="text-[10px] font-black text-slate-500 uppercase flex items-center">ID: {cliente.ID}</span>
+                                                <div className="flex flex-col gap-1 mt-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <Badge variant="danger">PENDIENTE</Badge>
+                                                        <span className="text-[10px] font-black text-slate-500 uppercase">ID: {cliente.ID}</span>
+                                                    </div>
+                                                    <div className={cn(
+                                                        "text-[10px] font-black uppercase tracking-widest flex items-center gap-1",
+                                                        getDaysSince(cliente["ULTIMO PAGO"] || cliente["FECHA DE INSTALACION"]) > 60 ? "text-rose-500" : "text-amber-500"
+                                                    )}>
+                                                        <Calendar className="w-3 h-3" />
+                                                        {getDaysSince(cliente["ULTIMO PAGO"] || cliente["FECHA DE INSTALACION"])} Días de Mora
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td className="px-8 py-6">
