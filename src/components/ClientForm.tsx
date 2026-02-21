@@ -208,6 +208,17 @@ export default function ClientForm({ initialData, onSuccess, onCancel }: ClientF
                             <input {...register("CONTACTO 2")} className="input-field" />
                         </div>
                     </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="form-group">
+                            <label>Fecha de Instalación</label>
+                            <input {...register("FECHA DE INSTALACION")} className="input-field" placeholder="DD/MM/YYYY" />
+                        </div>
+                        <div className="form-group">
+                            <label>Último Pago (Fecha)</label>
+                            <input {...register("ULTIMO PAGO")} className="input-field" placeholder="DD/MM/YYYY" />
+                        </div>
+                    </div>
                 </div>
             </div>
 

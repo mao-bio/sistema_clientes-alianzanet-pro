@@ -63,3 +63,41 @@ export function getDaysSince(dateString?: string | null): number {
     const diffTime = Math.abs(new Date().getTime() - date.getTime());
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 }
+
+export function getNodeColor(nodeName: string) {
+    if (!nodeName) return { bg: "bg-slate-500/10", text: "text-slate-400", border: "border-slate-500/20" };
+
+    const nodes: Record<string, { bg: string, text: string, border: string }> = {
+        "NODO 1": { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/20" },
+        "NODO 2": { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/20" },
+        "NODO 3": { bg: "bg-amber-500/10", text: "text-amber-400", border: "border-amber-500/20" },
+        "NODO 4": { bg: "bg-rose-500/10", text: "text-rose-400", border: "border-rose-500/20" },
+        "NODO 5": { bg: "bg-indigo-500/10", text: "text-indigo-400", border: "border-indigo-500/20" },
+        "FIBRA": { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/20" },
+        "RADIO": { bg: "bg-orange-500/10", text: "text-orange-400", border: "border-orange-500/20" },
+    };
+
+    const upperNode = nodeName.toUpperCase();
+
+    // Si existe en el mapa predefinido
+    if (nodes[upperNode]) return nodes[upperNode];
+
+    // Si no, generar un color basado en el hash del nombre
+    const colors = [
+        { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/20" },
+        { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/20" },
+        { bg: "bg-amber-500/10", text: "text-amber-400", border: "border-amber-500/20" },
+        { bg: "bg-rose-500/10", text: "text-rose-400", border: "border-rose-500/20" },
+        { bg: "bg-indigo-500/10", text: "text-indigo-400", border: "border-indigo-500/20" },
+        { bg: "bg-cyan-500/10", text: "text-cyan-400", border: "border-cyan-500/20" },
+        { bg: "bg-lime-500/10", text: "text-lime-400", border: "border-lime-500/20" },
+        { bg: "bg-fuchsia-500/10", text: "text-fuchsia-400", border: "border-fuchsia-500/20" },
+    ];
+
+    let hash = 0;
+    for (let i = 0; i < upperNode.length; i++) {
+        hash = upperNode.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    return colors[Math.abs(hash) % colors.length];
+}

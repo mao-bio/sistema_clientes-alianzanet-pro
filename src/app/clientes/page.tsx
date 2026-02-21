@@ -16,7 +16,7 @@ import {
     CreditCard
 } from "lucide-react";
 import { apiService } from "@/lib/api";
-import { formatCOP, makeWhatsAppLink, cn } from "@/lib/utils";
+import { formatCOP, makeWhatsAppLink, cn, getNodeColor } from "@/lib/utils";
 import Badge from "@/components/Badge";
 import Modal from "@/components/Modal";
 import ClientForm from "@/components/ClientForm";
@@ -29,11 +29,14 @@ export default function ClientesPage() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [filterEstado, setFilterEstado] = useState("TODOS");
+    const [sortBy, setSortBy] = useState<'ID' | 'NOMBRE'>('ID');
 
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalMode, setModalMode] = useState<'create' | 'edit' | 'payment' | 'view'>('create');
+    const [modalMode, setModalMode] = useState<'create' | 'edit' | 'payment' | 'view' | 'delete'>('create');
     const [selectedClient, setSelectedClient] = useState<any | null>(null);
+    const [deleteStep, setDeleteStep] = useState(1);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const fetchData = async () => {
         setLoading(true);
@@ -75,6 +78,34 @@ export default function ClientesPage() {
         setIsModalOpen(true);
     };
 
+    const handleDeleteClick = (cliente: any) => {
+        setSelectedClient(cliente);
+        setModalMode('delete');
+        setDeleteStep(1);
+        setIsModalOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (deleteStep === 1) {
+            setDeleteStep(2);
+            return;
+        }
+
+        setIsDeleting(true);
+        try {
+            await apiService.postAction({
+                action: 'deleteCliente',
+                ID: selectedClient.ID
+            });
+            handleSuccess();
+        } catch (error) {
+            console.error("Error al eliminar cliente:", error);
+            alert("No se pudo eliminar el cliente. Intente de nuevo.");
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
     const handleSuccess = () => {
         setIsModalOpen(false);
         fetchData(); // Refresh data
@@ -89,6 +120,11 @@ export default function ClientesPage() {
         const matchEstado = filterEstado === "TODOS" || c.ESTADO === filterEstado;
 
         return matchSearch && matchEstado;
+    }).sort((a, b) => {
+        if (sortBy === 'NOMBRE') {
+            return (a.NOMBRE || "").localeCompare(b.NOMBRE || "");
+        }
+        return (a.ID || 0) - (b.ID || 0);
     });
 
     return (
@@ -135,6 +171,15 @@ export default function ClientesPage() {
                         <option value="ACTIVO" className="bg-slate-900">Activos</option>
                         <option value="SUSPENDIDO" className="bg-slate-900">Suspendidos</option>
                         <option value="INACTIVO" className="bg-slate-900">Inactivos</option>
+                    </select>
+
+                    <select
+                        className="bg-white/[0.03] border border-white/10 text-white rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition-all font-bold"
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value as 'ID' | 'NOMBRE')}
+                    >
+                        <option value="ID" className="bg-slate-900">Ordenar por ID</option>
+                        <option value="NOMBRE" className="bg-slate-900">Ordenar por Nombre (A-Z)</option>
                     </select>
 
                     <button className="p-4 glass-card border-white/10 text-slate-400 hover:text-amber-400 transition-all hover:scale-105">
@@ -208,7 +253,14 @@ export default function ClientesPage() {
                                                         <span className="text-sm font-medium text-slate-300">{cliente.DIRECCION}</span>
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] font-black px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">{cliente.NODO}</span>
+                                                        <span className={cn(
+                                                            "text-[10px] font-black px-2 py-0.5 rounded border transition-colors",
+                                                            getNodeColor(cliente.NODO).bg,
+                                                            getNodeColor(cliente.NODO).text,
+                                                            getNodeColor(cliente.NODO).border
+                                                        )}>
+                                                            {cliente.NODO}
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </td>
@@ -246,6 +298,13 @@ export default function ClientesPage() {
                                                     >
                                                         <Pencil className="w-5 h-5" />
                                                     </button>
+                                                    <button
+                                                        className="p-3 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-lg hover:shadow-red-500/20"
+                                                        title="Eliminar Cliente"
+                                                        onClick={() => handleDeleteClick(cliente)}
+                                                    >
+                                                        <Trash2 className="w-5 h-5" />
+                                                    </button>
                                                 </div>
                                             </td>
                                         </motion.tr>
@@ -264,7 +323,8 @@ export default function ClientesPage() {
                     modalMode === 'create' ? "Nuevo Cliente" :
                         modalMode === 'edit' ? "Editar Cliente" :
                             modalMode === 'view' ? "Información Detallada" :
-                                "Registrar Pago"
+                                modalMode === 'delete' ? "Confirmar Eliminación" :
+                                    "Registrar Pago"
                 }
             >
                 {modalMode === 'payment' ? (
@@ -278,6 +338,51 @@ export default function ClientesPage() {
                         cliente={selectedClient}
                         onClose={() => setIsModalOpen(false)}
                     />
+                ) : modalMode === 'delete' ? (
+                    <div className="p-6 text-center space-y-6">
+                        <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Trash2 className="w-10 h-10 text-red-500" />
+                        </div>
+
+                        <div className="space-y-2">
+                            <h3 className="text-2xl font-bold text-white">
+                                {deleteStep === 1
+                                    ? "¿Eliminar este cliente?"
+                                    : "¡Atención: Acción Irreversible!"}
+                            </h3>
+                            <p className="text-slate-400">
+                                {deleteStep === 1
+                                    ? `¿Estás seguro que deseas eliminar a ${selectedClient.NOMBRE}?`
+                                    : `Si confirmas, todos los datos de ${selectedClient.NOMBRE} se borrarán permanentemente de la base de datos.`}
+                            </p>
+                        </div>
+
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="flex-1 py-4 bg-white/5 text-slate-300 rounded-2xl font-bold hover:bg-white/10 transition-all"
+                                disabled={isDeleting}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                disabled={isDeleting}
+                                className={cn(
+                                    "flex-1 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2",
+                                    deleteStep === 1
+                                        ? "bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white"
+                                        : "bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-600/20"
+                                )}
+                            >
+                                {isDeleting ? (
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                    deleteStep === 1 ? "Eliminar" : "Sí, Borrar Definitivamente"
+                                )}
+                            </button>
+                        </div>
+                    </div>
                 ) : (
                     <ClientForm
                         initialData={selectedClient}

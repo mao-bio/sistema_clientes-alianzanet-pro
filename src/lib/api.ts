@@ -57,11 +57,40 @@ export const apiService = {
         }
 
         if (action === "deleteCliente") {
-            const { error } = await supabase
+            const deletedId = Number(data.ID);
+
+            // 1. ELIMINAR CLIENTE
+            const { error: deleteError } = await supabase
                 .from('clientes')
                 .delete()
-                .eq('ID', data.ID);
-            if (error) throw error;
+                .eq('ID', deletedId);
+
+            if (deleteError) throw deleteError;
+
+            // 2. REORDENAR IDS RESTANTES
+            // Obtenemos todos los clientes con ID mayor al eliminado para moverlos hacia atrás
+            const { data: clientsToUpdate, error: fetchError } = await supabase
+                .from('clientes')
+                .select('ID')
+                .gt('ID', deletedId)
+                .order('ID', { ascending: true });
+
+            if (fetchError) throw fetchError;
+
+            // Actualizamos los IDs secuencialmente para evitar conflictos de llave primaria
+            if (clientsToUpdate && clientsToUpdate.length > 0) {
+                for (const client of clientsToUpdate) {
+                    const { error: updateError } = await supabase
+                        .from('clientes')
+                        .update({ ID: client.ID - 1 })
+                        .eq('ID', client.ID);
+
+                    if (updateError) {
+                        console.error(`Error reordenando ID para cliente ${client.ID}:`, updateError);
+                    }
+                }
+            }
+
             return { status: "deleted" };
         }
 
