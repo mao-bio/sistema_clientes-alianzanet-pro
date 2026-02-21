@@ -16,6 +16,7 @@ import {
     CreditCard
 } from "lucide-react";
 import { apiService } from "@/lib/api";
+import { NODOS } from "@/lib/constants";
 import { formatCOP, makeWhatsAppLink, cn, getNodeColor } from "@/lib/utils";
 import Badge from "@/components/Badge";
 import Modal from "@/components/Modal";
@@ -29,6 +30,7 @@ export default function ClientesPage() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [filterEstado, setFilterEstado] = useState("TODOS");
+    const [filterNodo, setFilterNodo] = useState("TODOS");
     const [sortBy, setSortBy] = useState<'ID' | 'NOMBRE'>('ID');
 
     // Modal State
@@ -118,8 +120,9 @@ export default function ClientesPage() {
             String(c.ID).includes(search);
 
         const matchEstado = filterEstado === "TODOS" || c.ESTADO === filterEstado;
+        const matchNodo = filterNodo === "TODOS" || c.NODO === filterNodo;
 
-        return matchSearch && matchEstado;
+        return matchSearch && matchEstado && matchNodo;
     }).sort((a, b) => {
         if (sortBy === 'NOMBRE') {
             return (a.NOMBRE || "").localeCompare(b.NOMBRE || "");
@@ -171,6 +174,17 @@ export default function ClientesPage() {
                         <option value="ACTIVO" className="bg-slate-900">Activos</option>
                         <option value="SUSPENDIDO" className="bg-slate-900">Suspendidos</option>
                         <option value="INACTIVO" className="bg-slate-900">Inactivos</option>
+                    </select>
+
+                    <select
+                        className="bg-white/[0.03] border border-white/10 text-white rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition-all font-bold"
+                        value={filterNodo}
+                        onChange={(e) => setFilterNodo(e.target.value)}
+                    >
+                        <option value="TODOS" className="bg-slate-900">Todos los Nodos</option>
+                        {NODOS.map(n => (
+                            <option key={n} value={n} className="bg-slate-900">{n}</option>
+                        ))}
                     </select>
 
                     <select
