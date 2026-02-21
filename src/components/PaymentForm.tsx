@@ -85,19 +85,19 @@ export default function PaymentForm({ cliente, onSuccess, onCancel }: PaymentFor
 
     return (
         <div className="space-y-6">
-            <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-4 flex items-center justify-between">
+            <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <p className="text-sm text-indigo-300 font-bold uppercase tracking-wider">Cliente</p>
                     <h3 className="text-xl font-bold text-white">{cliente.NOMBRE}</h3>
                 </div>
-                <div className="text-right">
+                <div className="sm:text-right">
                     <p className="text-sm text-indigo-300 font-bold uppercase tracking-wider">Plan Actual</p>
                     <p className="text-white font-mono">{cliente.PLAN} - {formatCOP(valorMensual)}</p>
                 </div>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <label className="text-sm font-bold text-slate-400 uppercase">Mes a Pagar</label>
                         <select

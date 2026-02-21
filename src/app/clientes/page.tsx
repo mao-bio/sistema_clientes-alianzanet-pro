@@ -152,8 +152,8 @@ export default function ClientesPage() {
             </div>
 
             {/* Filters & Search */}
-            <div className="flex flex-wrap items-center gap-6 glass-card p-6 border-white/5">
-                <div className="flex-1 min-w-[300px] relative group">
+            <div className="flex flex-col xl:flex-row xl:items-center gap-6 glass-card p-6 border-white/5">
+                <div className="flex-1 relative group w-full">
                     <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-amber-400 transition-colors" />
                     <input
                         type="text"
@@ -164,9 +164,9 @@ export default function ClientesPage() {
                     />
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-4 w-full xl:w-auto">
                     <select
-                        className="bg-white/[0.03] border border-white/10 text-white rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition-all font-bold"
+                        className="flex-1 xl:flex-none bg-white/[0.03] border border-white/10 text-white rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition-all font-bold"
                         value={filterEstado}
                         onChange={(e) => setFilterEstado(e.target.value)}
                     >
@@ -177,7 +177,7 @@ export default function ClientesPage() {
                     </select>
 
                     <select
-                        className="bg-white/[0.03] border border-white/10 text-white rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition-all font-bold"
+                        className="flex-1 xl:flex-none bg-white/[0.03] border border-white/10 text-white rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition-all font-bold"
                         value={filterNodo}
                         onChange={(e) => setFilterNodo(e.target.value)}
                     >
@@ -188,7 +188,7 @@ export default function ClientesPage() {
                     </select>
 
                     <select
-                        className="bg-white/[0.03] border border-white/10 text-white rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition-all font-bold"
+                        className="flex-1 xl:flex-none bg-white/[0.03] border border-white/10 text-white rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition-all font-bold"
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value as 'ID' | 'NOMBRE')}
                     >
@@ -196,7 +196,7 @@ export default function ClientesPage() {
                         <option value="NOMBRE" className="bg-slate-900">Ordenar por Nombre (A-Z)</option>
                     </select>
 
-                    <button className="p-4 glass-card border-white/10 text-slate-400 hover:text-amber-400 transition-all hover:scale-105">
+                    <button className="p-4 glass-card border-white/10 text-slate-400 hover:text-amber-400 transition-all hover:scale-105 ml-auto xl:ml-0">
                         <Download className="w-6 h-6" />
                     </button>
                 </div>
@@ -371,10 +371,10 @@ export default function ClientesPage() {
                             </p>
                         </div>
 
-                        <div className="flex gap-4">
+                        <div className="flex flex-col sm:flex-row gap-4">
                             <button
                                 onClick={() => setIsModalOpen(false)}
-                                className="flex-1 py-4 bg-white/5 text-slate-300 rounded-2xl font-bold hover:bg-white/10 transition-all"
+                                className="flex-1 py-4 bg-white/5 text-slate-300 rounded-2xl font-bold hover:bg-white/10 transition-all order-2 sm:order-1"
                                 disabled={isDeleting}
                             >
                                 Cancelar
@@ -383,7 +383,7 @@ export default function ClientesPage() {
                                 onClick={confirmDelete}
                                 disabled={isDeleting}
                                 className={cn(
-                                    "flex-1 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2",
+                                    "flex-1 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 order-1 sm:order-2",
                                     deleteStep === 1
                                         ? "bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white"
                                         : "bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-600/20"
