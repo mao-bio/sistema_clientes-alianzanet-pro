@@ -75,6 +75,7 @@ export function getNodeColor(nodeName: string) {
         "NODO 5": { bg: "bg-indigo-500/10", text: "text-indigo-400", border: "border-indigo-500/20" },
         "FIBRA": { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/20" },
         "RADIO": { bg: "bg-orange-500/10", text: "text-orange-400", border: "border-orange-500/20" },
+        "LAS DELICIAS": { bg: "bg-cyan-500/10", text: "text-cyan-400", border: "border-cyan-500/20" },
     };
 
     const upperNode = nodeName.toUpperCase();

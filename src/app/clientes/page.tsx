@@ -256,7 +256,7 @@ export default function ClientesPage() {
                                                         >
                                                             {cliente.NOMBRE}
                                                         </button>
-                                                        <p className="text-[10px] text-slate-500 font-black uppercase tracking-wider">{cliente.USUARIO || 'Sin Identificador'}</p>
+                                                        <p className="text-[10px] text-slate-500 font-black uppercase tracking-wider">{cliente.USUARIO || ''}</p>
                                                     </div>
                                                 </div>
                                             </td>

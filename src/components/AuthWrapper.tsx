@@ -31,8 +31,8 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
 
                 <div className="w-full max-w-lg relative z-10">
                     <div className="text-center mb-10">
-                        <div className="w-20 h-20 premium-gradient rounded-[28px] mx-auto flex items-center justify-center shadow-[0_20px_40px_rgba(245,158,11,0.3)] mb-6 rotate-3 hover:rotate-0 transition-transform duration-500 border border-white/20">
-                            <ShieldCheck className="w-10 h-10 text-white" />
+                        <div className="w-24 h-24 bg-white/5 rounded-[28px] mx-auto flex items-center justify-center shadow-2xl mb-6 rotate-3 hover:rotate-0 transition-transform duration-500 border border-white/20 overflow-hidden p-2">
+                            <img src="/logo.png" alt="ALIANZANET" className="w-full h-full object-contain" />
                         </div>
                         <h1 className="text-5xl font-black text-white tracking-tighter mb-2 uppercase italic">
                             ALIANZA<span className="text-gradient">NET</span>

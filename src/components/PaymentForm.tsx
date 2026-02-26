@@ -15,7 +15,7 @@ interface PaymentFormProps {
 
 export default function PaymentForm({ cliente, onSuccess, onCancel }: PaymentFormProps) {
     const [loading, setLoading] = useState(false);
-    const [adelanto, setAdelanto] = useState(0);
+    const [adelanto, setAdelanto] = useState(1);
 
     const { register, handleSubmit, watch, setValue } = useForm({
         defaultValues: {
@@ -29,7 +29,7 @@ export default function PaymentForm({ cliente, onSuccess, onCancel }: PaymentFor
         ? parseFloat(cliente.VALOR.replace(/[$. ,]/g, ''))
         : cliente.VALOR;
 
-    const totalPagar = valorMensual * (adelanto > 0 ? adelanto : 1);
+    const totalPagar = valorMensual * adelanto;
 
     const onSubmit = async (data: any) => {
         setLoading(true);
@@ -54,7 +54,7 @@ export default function PaymentForm({ cliente, onSuccess, onCancel }: PaymentFor
             const proximaFecha = new Date(proximoYear, proximoMonthIdx, 10);
             payload["PROXIMO PAGO"] = proximaFecha.toLocaleDateString('es-CO');
 
-            if (adelanto > 0) {
+            if (adelanto > 1) {
                 // Find index of selected month
                 const idx = MESES_ES.indexOf(data.mes);
                 const newIdx = (idx + adelanto - 1) % 12;
@@ -109,26 +109,23 @@ export default function PaymentForm({ cliente, onSuccess, onCancel }: PaymentFor
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-400 uppercase">Pago Adelantado</label>
-                        <div className="grid grid-cols-3 gap-2">
-                            {[0, 3, 6].map(months => (
-                                <button
-                                    key={months}
-                                    type="button"
-                                    onClick={() => setAdelanto(months)}
-                                    className={`px-2 py-3 rounded-xl border text-sm font-bold transition-all ${adelanto === months ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-950 border-white/10 text-slate-400 hover:bg-slate-900'}`}
-                                >
-                                    {months === 0 ? '1 Mes' : `${months} Meses`}
-                                </button>
+                        <label className="text-sm font-bold text-slate-400 uppercase">Cantidad de Meses</label>
+                        <select
+                            value={adelanto}
+                            onChange={(e) => setAdelanto(parseInt(e.target.value))}
+                            className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-indigo-500/50"
+                        >
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(n => (
+                                <option key={n} value={n}>{n} {n === 1 ? 'Mes' : 'Meses'}</option>
                             ))}
-                        </div>
+                        </select>
                     </div>
                 </div>
 
                 <div className="pt-6 border-t border-white/5">
                     <div className="flex items-center justify-between mb-6">
                         <span className="text-slate-400 font-medium">Total a Cobrar</span>
-                        <span className="text-3xl font-bold text-emerald-400">{formatCOP(totalPagar)}</span>
+                        <span className="text-3xl font-bold text-emerald-400">{formatCOP(valorMensual * (adelanto || 1))}</span>
                     </div>
 
                     <label className="flex items-center gap-3 p-4 bg-slate-950 rounded-xl border border-white/5 cursor-pointer hover:bg-slate-900 transition-colors">

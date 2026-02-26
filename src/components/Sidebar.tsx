@@ -32,8 +32,8 @@ export default function Sidebar() {
             {/* Logo Section */}
             <div className="p-8">
                 <div className="flex items-center gap-4 group">
-                    <div className="w-12 h-12 premium-gradient rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:scale-110 transition-transform duration-500 border border-white/10">
-                        <Shield className="w-6 h-6 text-white" />
+                    <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500 border border-white/10 overflow-hidden p-1">
+                        <img src="/logo.png" alt="ALIANZANET" className="w-full h-full object-contain" />
                     </div>
                     <div>
                         <h1 className="text-2xl font-black text-white tracking-tighter italic">
