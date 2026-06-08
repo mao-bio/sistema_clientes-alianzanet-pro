@@ -123,14 +123,20 @@ export default function MorososPage() {
                 deuda: c.VALOR
             }));
 
+            // 1. Correo vía GAS Bridge
             await apiService.postAction({
                 action: "sendAdminReport",
                 destinatario: "alianzanet9@gmail.com",
                 morosos: reportData
             });
-            alert("✅ Reporte enviado exitosamente");
+
+            // 2. Telegram Directo
+            await apiService.sendTelegramReport(reportData);
+
+            alert("✅ Reporte enviado exitosamente a Correo y Telegram");
         } catch (e) {
-            alert("❌ Error al enviar reporte");
+            console.error(e);
+            alert("❌ Error al enviar reporte. Verifica la configuración de Telegram.");
         } finally {
             setSendingBatch(false);
         }

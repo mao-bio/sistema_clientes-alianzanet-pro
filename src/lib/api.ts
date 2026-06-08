@@ -20,7 +20,6 @@ function filterPayload(data: any) {
         if (key in data) {
             let value = data[key];
 
-            // Forzar tipos correctos para Supabase
             if (key === "ID") value = Number(value);
             if (key === "VALOR" && typeof value === 'string') {
                 value = parseFloat(value.replace(/[$. ,]/g, '')) || 0;
@@ -34,32 +33,42 @@ function filterPayload(data: any) {
 
 export const apiService = {
     async getClientes() {
+        console.log("🔍 Fetching todos los clientes...");
         const { data, error } = await supabase
             .from('clientes')
             .select('*')
             .order('ID', { ascending: true });
 
-        if (error) throw error;
-        return data; // Ya no requiere mapeo
+        if (error) {
+            console.error("❌ Error en getClientes:", error);
+            throw error;
+        }
+        return data;
     },
 
     async postAction(payload: any) {
         const { action, ...data } = payload;
-        const TOKEN = process.env.NEXT_PUBLIC_API_TOKEN || "MI_TOKEN_SEGURO";
+        // Priorizar el token de constantes si el env no existe
+        const currentToken = process.env.NEXT_PUBLIC_API_TOKEN || TOKEN;
+
+        console.log(`🚀 Ejecutando acción: ${action}`, { action });
 
         if (action === "saveCliente") {
             const dbData = filterPayload(data);
             const { error } = await supabase
                 .from('clientes')
                 .upsert(dbData, { onConflict: 'ID' });
-            if (error) throw error;
+            if (error) {
+                console.error("❌ Error en saveCliente:", error);
+                throw error;
+            }
             return { status: "success" };
         }
 
         if (action === "deleteCliente") {
             const deletedId = Number(data.ID);
+            console.log(`🗑️ Eliminando cliente ID: ${deletedId}`);
 
-            // 1. ELIMINAR CLIENTE
             const { error: deleteError } = await supabase
                 .from('clientes')
                 .delete()
@@ -67,8 +76,6 @@ export const apiService = {
 
             if (deleteError) throw deleteError;
 
-            // 2. REORDENAR IDS RESTANTES
-            // Obtenemos todos los clientes con ID mayor al eliminado para moverlos hacia atrás
             const { data: clientsToUpdate, error: fetchError } = await supabase
                 .from('clientes')
                 .select('ID')
@@ -77,17 +84,12 @@ export const apiService = {
 
             if (fetchError) throw fetchError;
 
-            // Actualizamos los IDs secuencialmente para evitar conflictos de llave primaria
             if (clientsToUpdate && clientsToUpdate.length > 0) {
                 for (const client of clientsToUpdate) {
-                    const { error: updateError } = await supabase
+                    await supabase
                         .from('clientes')
                         .update({ ID: client.ID - 1 })
                         .eq('ID', client.ID);
-
-                    if (updateError) {
-                        console.error(`Error reordenando ID para cliente ${client.ID}:`, updateError);
-                    }
                 }
             }
 
@@ -96,20 +98,25 @@ export const apiService = {
 
         // Email GAS Bridge
         if (action.startsWith("send")) {
-            console.log("📤 Ejecutando acción de email:", action, payload);
-            const currentToken = TOKEN;
-            const response = await fetch(`${API_URL}?action=${action}&token=${currentToken}`, {
-                method: 'POST',
-                mode: 'cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ ...payload, token: currentToken })
-            });
+            console.log(`📤 Enviando reporte/email (${action}) a GAS...`);
 
-            const resultText = await response.text();
-            console.log("📩 Respuesta del servidor de correos (GAS):", resultText);
+            try {
+                const response = await fetch(`${API_URL}?action=${action}&token=${currentToken}`, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ ...payload, token: currentToken })
+                });
 
-            if (!response.ok) throw new Error("Error en servidor de correos (GAS): " + resultText);
-            return { status: "email_sent", response: resultText };
+                const resultText = await response.text();
+                console.log("📩 Respuesta de GAS:", resultText);
+
+                if (!response.ok) throw new Error(`GAS Error: ${resultText}`);
+                return { status: "email_sent", response: resultText };
+            } catch (err) {
+                console.error("❌ Error conectando con GAS:", err);
+                throw err;
+            }
         }
 
         if (action === "saveHistorial") {
@@ -123,13 +130,64 @@ export const apiService = {
         return { error: "Acción no manejada" };
     },
 
+    async sendTelegramReport(reportData: any[]) {
+        const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+        const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+
+        if (!BOT_TOKEN || !CHAT_ID) {
+            console.warn("⚠️ Telegram no configurado (falta TOKEN o CHAT_ID)");
+            return { error: "Telegram no configurado" };
+        }
+
+        const date = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long' });
+        let message = `📊 *REPORTE DE MOROSOS - ${date.toUpperCase()}* 📊\n\n`;
+
+        if (reportData.length === 0) {
+            message += "✅ No hay morosos críticos hoy.";
+        } else {
+            message += `Se han detectado *${reportData.length}* clientes en mora:\n\n`;
+
+            reportData.forEach((c, i) => {
+                const total = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(c.deuda).replace('COP', '');
+                message += `${i + 1}. *${c.nombre}*\n   ⏳ ${c.dias} días | 💰 ${total}\n\n`;
+            });
+
+            const totalDeuda = reportData.reduce((acc, c) => acc + (c.deuda || 0), 0);
+            const totalFmt = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(totalDeuda).replace('COP', '');
+            message += `➖➖➖➖➖➖➖➖➖➖\n💸 *DEUDA TOTAL: ${totalFmt}*`;
+        }
+
+        try {
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHAT_ID,
+                    text: message,
+                    parse_mode: 'Markdown'
+                })
+            });
+
+            const result = await response.json();
+            return result;
+        } catch (error) {
+            console.error("❌ Error enviando a Telegram:", error);
+            throw error;
+        }
+    },
+
     async getMorosos(mes: string) {
+        console.log(`📉 Buscando morosos para el mes: ${mes}`);
         const { data, error } = await supabase
             .from('clientes')
             .select('*')
             .neq('MES PAGADO', mes);
 
-        if (error) throw error;
+        if (error) {
+            console.error("❌ Error en getMorosos:", error);
+            throw error;
+        }
         return data;
     },
 
@@ -143,3 +201,4 @@ export const apiService = {
         return data;
     }
 };
+

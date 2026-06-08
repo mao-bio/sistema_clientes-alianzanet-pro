@@ -99,7 +99,7 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
                         </form>
                     </div>
 
-                    <p className="text-center text-slate-600 text-[10px] font-black uppercase tracking-[0.2em] mt-10 opacity-50">
+                    <p className="text-center text-slate-600 text-[10px] font-black uppercase tracking-[0.2em] mt-10 opacity-50" suppressHydrationWarning>
                         ALIANZANET PRO &copy; {new Date().getFullYear()} &bull; INFRAESTRUCTURA DE RED RESTRINGIDA
                     </p>
                 </div>

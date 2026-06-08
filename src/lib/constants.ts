@@ -1,5 +1,5 @@
 
-export const API_URL = "https://script.google.com/macros/s/AKfycbykhoTVz8Xyc3v_ve12Qu53dZLE9qZ9S89uAJdMNEmjjAvqHia-3Y5kk2x1Uadjjnqm/exec";
+export const API_URL = "https://script.google.com/macros/s/AKfycbxLLWptTzOUWYaQCnrjYth3BDRPEnEY5gQDaoWMxctB1c4B8Tr-fcc8gBfdlKfcQdno/exec";
 export const TOKEN = "MI_TOKEN_SEGURO";
 
 export const MESES_ES = [
