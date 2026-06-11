@@ -212,6 +212,7 @@ export default function ClientesPage() {
                                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Ubicación & Red</th>
                                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Estado</th>
                                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Suscripción</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Último Pago</th>
                                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Acciones Rápidas</th>
                             </tr>
                         </thead>
@@ -219,7 +220,7 @@ export default function ClientesPage() {
                             <AnimatePresence>
                                 {loading ? (
                                     <tr>
-                                        <td colSpan={5} className="px-8 py-32 text-center text-slate-500 font-medium">
+                                        <td colSpan={6} className="px-8 py-32 text-center text-slate-500 font-medium">
                                             <div className="flex flex-col items-center gap-4">
                                                 <div className="w-12 h-12 border-4 border-amber-500/10 border-t-amber-500 rounded-full animate-spin" />
                                                 <span className="text-xl font-bold text-gradient">Sincronizando base de datos...</span>
@@ -228,7 +229,7 @@ export default function ClientesPage() {
                                     </tr>
                                 ) : filtered.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} className="px-8 py-32 text-center text-slate-500 font-medium">
+                                        <td colSpan={6} className="px-8 py-32 text-center text-slate-500 font-medium">
                                             <div className="flex flex-col items-center gap-2">
                                                 <Filter className="w-12 h-12 text-slate-700 mb-2" />
                                                 <span className="text-lg">No se encontraron clientes coincidentes</span>
@@ -286,6 +287,24 @@ export default function ClientesPage() {
                                             <td className="px-8 py-6">
                                                 <p className="text-white font-black text-sm italic">{cliente.PLAN}</p>
                                                 <p className="text-lg text-amber-400 font-black tracking-tight">{formatCOP(cliente.VALOR)}</p>
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <div className="flex flex-col">
+                                                    {cliente["MES PAGADO"] ? (
+                                                        <span className="text-white font-black text-sm uppercase tracking-wide bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-lg border border-emerald-500/20 w-fit">
+                                                            {cliente["MES PAGADO"]}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-slate-400 font-bold text-sm bg-white/5 px-2.5 py-1 rounded-lg border border-white/5 w-fit">
+                                                            Ninguno
+                                                        </span>
+                                                    )}
+                                                    {cliente["ULTIMO PAGO"] && (
+                                                        <span className="text-[10px] text-slate-500 font-medium mt-1.5 pl-0.5">
+                                                            Reg: {cliente["ULTIMO PAGO"]}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="px-8 py-6">
                                                 <div className="flex items-center gap-3">

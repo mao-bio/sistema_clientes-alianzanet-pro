@@ -85,14 +85,25 @@ export default function PaymentForm({ cliente, onSuccess, onCancel }: PaymentFor
 
     return (
         <div className="space-y-6">
-            <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                    <p className="text-sm text-indigo-300 font-bold uppercase tracking-wider">Cliente</p>
-                    <h3 className="text-xl font-bold text-white">{cliente.NOMBRE}</h3>
+                    <p className="text-xs text-indigo-300 font-black uppercase tracking-widest">Cliente</p>
+                    <h3 className="text-lg font-bold text-white mt-1">{cliente.NOMBRE}</h3>
                 </div>
-                <div className="sm:text-right">
-                    <p className="text-sm text-indigo-300 font-bold uppercase tracking-wider">Plan Actual</p>
-                    <p className="text-white font-mono">{cliente.PLAN} - {formatCOP(valorMensual)}</p>
+                <div>
+                    <p className="text-xs text-indigo-300 font-black uppercase tracking-widest">Plan Actual</p>
+                    <p className="text-white font-mono mt-1 text-sm">{cliente.PLAN} - {formatCOP(valorMensual)}</p>
+                </div>
+                <div>
+                    <p className="text-xs text-indigo-300 font-black uppercase tracking-widest">Último Mes Pagado</p>
+                    <p className="text-emerald-400 font-black mt-1 text-sm uppercase">
+                        {cliente["MES PAGADO"] || "Ninguno"}
+                        {cliente["ULTIMO PAGO"] && (
+                            <span className="text-[10px] text-slate-400 font-medium block mt-0.5 normal-case">
+                                Pago: {cliente["ULTIMO PAGO"]}
+                            </span>
+                        )}
+                    </p>
                 </div>
             </div>
 
