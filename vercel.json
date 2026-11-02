@@ -3,6 +3,10 @@
         {
             "path": "/api/cron/morosos-report?key=mi_secreto_local_de_seguridad",
             "schedule": "0 13 25 * *"
+        },
+        {
+            "path": "/api/cron/keep-alive",
+            "schedule": "0 15 */3 * *"
         }
     ]
 }
